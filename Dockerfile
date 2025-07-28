@@ -1,4 +1,4 @@
-FROM node:lts-buster
+FROM node:20.19.0-bullseye
 
 COPY package.json .
 

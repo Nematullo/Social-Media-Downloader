@@ -36,5 +36,5 @@ jobs:
             -e TOKEN="${{ secrets.BOT_TOKEN }}" \
             -e DEV_ID="${{ secrets.DEV_ID }}" \
             --restart unless-stopped \
-            -p 3333:8080 \
+            -p 3333:5000 \
             ${{ secrets.DOCKERHUB_USERNAME }}/social-media-downloader:latest
