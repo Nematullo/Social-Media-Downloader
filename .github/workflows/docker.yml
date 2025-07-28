@@ -1,0 +1,40 @@
+name: Build, Push и Запуск Docker Image Social-Media-Downloader
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-push-run:
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout репозитория
+        uses: actions/checkout@v4
+
+      - name: Вход в DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Сборка и пуш Docker образа
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/social-media-downloader:latest
+
+      - name: Остановка старого контейнера (если есть)
+        run: |
+          docker stop social-media-bot 2>/dev/null || true
+          docker rm social-media-bot 2>/dev/null || true
+
+      - name: Запуск нового контейнера
+        run: |
+          docker run -d --name social-media-bot \
+            -e TOKEN="${{ secrets.BOT_TOKEN }}" \
+            -e DEV_ID="${{ secrets.DEV_ID }}" \
+            --restart unless-stopped \
+            -p 3333:8080 \
+            ${{ secrets.DOCKERHUB_USERNAME }}/social-media-downloader:latest
